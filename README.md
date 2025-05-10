@@ -25,8 +25,8 @@
 </p>
 
 <p align="center">🎮 在线演示：
-  <a href="https://status.bsgun.cn" target="_blank">
-    https://status.bsgun.cn
+  <a href="https://status.tjqaq.com" target="_blank">
+    https://status.tjqaq.com
   </a>
 </p>
 
