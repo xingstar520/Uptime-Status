@@ -67,36 +67,42 @@
 本项目支持以下三种部署方式,均可实现自动处理跨域请求:
 
 1. **腾讯云 EdgeOne Pages**
+
    - 点击上方蓝色 "Deploy" 按钮
-   - 连接到GitHub，选择项目
-   - 框架预设选择Vue，点击开始部署
+   - 连接到 GitHub，选择项目
+   - 框架预设选择 Vue，点击开始部署
    - 使用默认配置 `VITE_UPTIMEROBOT_API_URL = "/api/status"`
 
 2. **Vercel**
+
    - 点击上方黑色 "Deploy" 按钮
-   - 连接到GitHub，选择项目
-   - 填写项目名称，点击Create
+   - 连接到 GitHub，选择项目
+   - 填写项目名称，点击 Create
    - 使用默认配置 `VITE_UPTIMEROBOT_API_URL = "/api/status"`
 
 3. **Cloudflare Pages**
+
    - 点击上方橙色 "Deploy" 按钮
    - 找到计算(worker) 部分
-   - 点击创建，选择Pages，连接到GitHub，选择项目，点击开始创建
-   - 框架预设选择Vue，点击保持并部署
+   - 点击创建，选择 Pages，连接到 GitHub，选择项目，点击开始创建
+   - 框架预设选择 Vue，点击保持并部署
    - 使用默认配置 `VITE_UPTIMEROBOT_API_URL = "/api/status"`
 
 4. **其他平台**
    - 自行搭建 API 代理
    - 在 `.env` 文件中设置 `VITE_UPTIMEROBOT_API_URL` 为你的 API 代理地址
+
 ### 快速开始
 
 1. 克隆项目
+
 ```bash
-git clone https://github.com/JLinmr/uptime-status.git
+git clone https://github.com/Xingstar520/uptime-status.git
 cd uptime-status
 ```
 
 2. 安装依赖
+
 ```bash
 pnpm install
 # 或
@@ -106,21 +112,23 @@ npm install
 3. 配置环境变量
 
 在 `.env` 文件中修改以下配置：
+
 ```bash
 # UptimeRobot API Key
 VITE_UPTIMEROBOT_API_KEY = "ur2290572-af4663a4e3f83be26119abbe"
 
-# UptimeRobot API URL 
-# 除腾讯云 EdgeOne Pages 、vercel 、cloudflare pages 外 
-## 其它部署方式需要自行搭建 API 代理 
+# UptimeRobot API URL
+# 除腾讯云 EdgeOne Pages 、vercel 、cloudflare pages 外
+## 其它部署方式需要自行搭建 API 代理
 ## 代理地址 https://api.uptimerobot.com/v2/getMonitors
 VITE_UPTIMEROBOT_API_URL = "/api/status"
 
 # 站点名称
-VITE_APP_TITLE = "梦爱吃鱼"
+VITE_APP_TITLE = "琦月图床"
 ```
 
 4. 开发调试
+
 ```bash
 pnpm dev
 # 或
@@ -130,11 +138,13 @@ npm run dev
 ```
 
 5. 构建部署
+
 ```bash
 pnpm build
 # 或
 npm run build
 ```
+
 构建的文件在 `dist` 目录下，将 `dist` 目录部署到服务器即可。
 
 ## 📝 开源协议
@@ -146,4 +156,4 @@ npm run build
 - [UptimeRobot](https://uptimerobot.com/) - 提供监控 API 支持
 - [Vue.js](https://vuejs.org/) - 前端框架
 - [Tailwind CSS](https://tailwindcss.com/) - CSS 框架
-- [Chart.js](https://www.chartjs.org/) - 图表库 
+- [Chart.js](https://www.chartjs.org/) - 图表库
