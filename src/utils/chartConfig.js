@@ -27,19 +27,19 @@ const CHART_CONFIG = {
   
   points: {
     pointBackgroundColor: '#fff',
-    pointBorderColor: '#10b981',
+    pointBorderColor: '#38bdf8',
     pointBorderWidth: 1.5,
     pointHoverBorderWidth: 1.5,
     pointHoverBackgroundColor: '#fff'
   },
   
   colors: {
-    success: '#10b981',
-    warning: '#eab308',
-    error: '#ef4444',
-    orange: '#ff7a45',
-    gray: 'rgb(120, 120, 120, 0.3)',
-    paused: '#eab308'
+    success: '#14b8a6',
+    warning: '#f59e0b',
+    error: '#f43f5e',
+    orange: '#fb923c',
+    gray: 'rgba(148, 163, 184, 0.32)',
+    paused: '#f59e0b'
   }
 }
 
@@ -173,9 +173,9 @@ export const getResponseTimeChartData = (monitor) => {
     datasets: [{
       label: '响应时间',
       data: validData,
-      borderColor: '#10b981',
-      backgroundColor: 'rgba(16, 185, 129, 0.05)',
-      borderWidth: 1.5,
+      borderColor: '#38bdf8',
+      backgroundColor: 'rgba(56, 189, 248, 0.12)',
+      borderWidth: 2,
       fill: true,
       tension: 0.4,
       pointRadius: 0,
@@ -208,7 +208,7 @@ export const responseTimeChartOptions = {
       grid: { display: false, drawBorder: false },
       ticks: {
         maxRotation: 0,
-        color: 'rgb(156, 163, 175)',
+        color: 'rgb(100, 116, 139)',
         padding: 8,
         maxTicksLimit: 12,
         font: { size: 11 }
@@ -218,12 +218,12 @@ export const responseTimeChartOptions = {
       beginAtZero: true,
       border: { display: false },
       grid: {
-        color: 'rgba(229, 231, 235, 0.5)',
+        color: 'rgba(125, 211, 252, 0.22)',
         drawBorder: false,
         lineWidth: 1
       },
       ticks: {
-        color: 'rgb(156, 163, 175)',
+        color: 'rgb(100, 116, 139)',
         padding: 8,
         font: { size: 11 },
         callback: value => `${value} ms`,
@@ -234,7 +234,7 @@ export const responseTimeChartOptions = {
   elements: {
     line: {
       tension: 0.4,
-      borderWidth: 1.5,
+      borderWidth: 2,
       borderCapStyle: 'round',
       borderJoinStyle: 'round',
       capBezierPoints: true

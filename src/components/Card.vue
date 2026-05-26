@@ -3,23 +3,20 @@
   <div v-if="!monitors?.length" class="flex items-center justify-center p-12">
     <Icon v-if="!error"
       icon="svg-spinners:180-ring-with-bg" 
-      class="w-12 h-12 text-gray-400 dark:text-gray-300 animate-spin"
+      class="h-12 w-12 animate-spin text-sky-400 dark:text-sky-200"
     />
     <div v-else 
-         class="flex flex-col items-center gap-4 p-8 rounded-2xl
-           bg-red-50/50 dark:bg-red-900/20 
-           border-2 border-red-100 dark:border-red-800/50
-           backdrop-blur-sm animate-fade"
+         class="ice-panel flex flex-col items-center gap-4 rounded-lg p-8 animate-fade"
     >
       <div class="relative">
         <Icon 
           icon="carbon:warning-filled" 
-          class="w-12 h-12 text-red-500/90 dark:text-red-400/90"
+          class="h-12 w-12 text-rose-500/90 dark:text-rose-300/90"
         />
-        <div class="absolute inset-0 w-12 h-12 bg-red-500/20 dark:bg-red-400/20 rounded-full animate-ping" />
+        <div class="absolute inset-0 h-12 w-12 rounded-full bg-rose-500/20 animate-ping dark:bg-rose-300/20" />
       </div>
       <div class="text-center">
-        <div class="text-red-600 dark:text-red-400 font-medium mb-1">
+        <div class="mb-1 font-medium text-rose-600 dark:text-rose-300">
           {{ error }}
         </div>
       </div>
@@ -27,31 +24,25 @@
   </div>
 
   <!-- 监控卡片网格布局 -->
-  <div v-else class="grid gap-6 grid-cols-1 md:grid-cols-2">
+  <div v-else class="grid grid-cols-1 gap-5 md:grid-cols-2">
     <!-- 单个监控卡片 -->
     <div v-for="monitor in sortedMonitors" 
          :key="monitor.id"
-         class="card-base animated-border p-6 rounded-2xl backdrop-blur-sm animate-fade"
-         :class="[
-           monitor.status === 0 || monitor.status === 1 
-             ? 'after:border-yellow-500/50 dark:after:border-yellow-400/50'
-             : `after:border-${STATUS_CONFIG[monitor.status]?.color}-500/50 dark:after:border-${STATUS_CONFIG[monitor.status]?.color}-400/50`
-         ]"
-         @mouseenter="$event.target.classList.add('hovered')"
+         class="card-base animated-border overflow-hidden p-5 animate-fade sm:p-6"
+         :class="getStatusCardAccent(monitor.status)"
+         @mouseenter="$event.currentTarget.classList.add('hovered')"
     >
+      <div class="absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-sky-300/70 to-transparent dark:via-sky-200/25" />
       <!-- 卡片头部：标题和状态指示器 -->
       <div class="flex items-start sm:items-center justify-between gap-3 sm:gap-4 mb-6">
         <div class="min-w-0">
           <div class="flex items-center gap-2">
-            <h2 class="text-lg sm:text-xl font-bold truncate text-gray-800 dark:text-gray-100">
+            <h2 class="truncate text-lg font-bold text-slate-900 dark:text-sky-50 sm:text-xl">
               {{ monitor.friendly_name }}
             </h2>
             <Icon 
               icon="bi:link-45deg" 
-              class="w-5 h-5 p-1.5 rounded-full transition-colors duration-200
-                text-gray-400 hover:text-gray-600 hover:bg-gray-100
-                dark:text-gray-500 dark:hover:text-gray-400 dark:hover:bg-gray-700/50
-                box-content"
+              class="box-content h-5 w-5 cursor-pointer rounded-full p-1.5 text-sky-500/70 transition-colors duration-200 hover:bg-sky-100/80 hover:text-sky-700 dark:text-sky-200/60 dark:hover:bg-sky-900/50 dark:hover:text-sky-100"
               @click="openUrl(monitor.url)"
             />
           </div>
@@ -59,7 +50,7 @@
         <div class="shrink-0">
           <div v-if="typeof monitor.status !== 'undefined'"
                :class="[
-                 'inline-flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full font-medium text-sm whitespace-nowrap',
+                 'status-chip',
                  STATUS_CONFIG[monitor.status]?.classes
                ]"
           >
@@ -81,32 +72,32 @@
       <!-- 卡片主体：统计数据和图表 -->
       <div class="space-y-4">
         <!-- 响应时间和运行时间统计卡片 -->
-        <div class="grid grid-cols-2 gap-4">
+        <div class="grid grid-cols-2 gap-3 sm:gap-4">
           <div class="inner-card relative">
             <Icon 
               icon="ri:line-chart-line"
               :class="[
-                'absolute top-3 right-3 w-4 h-4 p-1 rounded-full transition-colors duration-200 box-content cursor-pointer',
+                'absolute right-3 top-3 box-content h-4 w-4 cursor-pointer rounded-full p-1 transition-colors duration-200',
                 getStatusClasses(monitor.status).text,
                 getStatusClasses(monitor.status).hover.text,
                 getStatusClasses(monitor.status).hover.bg
               ]"
               @click="openResponseTimeModal(monitor)"
             />
-            <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">平均响应时间</div>
-            <div class="text-xl font-bold text-gray-900 dark:text-gray-100">
+            <div class="mb-1 text-xs font-medium text-slate-500 dark:text-sky-100/65">平均响应时间</div>
+            <div class="text-xl font-bold tabular-nums text-slate-950 dark:text-sky-50">
               {{ formatters.responseTime(monitor.stats?.avgResponseTime) }}
             </div>
-            <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+            <div class="mt-1 text-xs text-slate-500 dark:text-slate-400">
               最近24小时
             </div>
           </div>
           <div class="inner-card">
-            <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">平均运行时间</div>
-            <div class="text-xl font-bold text-gray-900 dark:text-gray-100">
+            <div class="mb-1 text-xs font-medium text-slate-500 dark:text-sky-100/65">平均运行时间</div>
+            <div class="text-xl font-bold tabular-nums text-slate-950 dark:text-sky-50">
               {{ formatters.uptime(monitor.stats?.uptime) }}
             </div>
-            <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+            <div class="mt-1 text-xs text-slate-500 dark:text-slate-400">
               最近{{ getValidDays(monitor) }}天
             </div>
           </div>
@@ -115,7 +106,7 @@
         <!-- 状态时间线图表 -->
         <div class="inner-card">
           <!-- 监控类型和状态指示器 -->
-          <div class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mb-4">
+          <div class="mb-4 flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
             <div class="flex items-center gap-1">
               <div class="relative flex">
                 <div :class="[
@@ -128,7 +119,7 @@
                 ]"></div>
               </div>
               <span class="text-xs">{{ getMonitorType(monitor) }} / {{ Math.floor(monitor.interval / 60) }}m</span>
-              <div class="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-600" />
+              <div class="h-1 w-1 rounded-full bg-sky-300/80 dark:bg-sky-700" />
               <span :class="[
                 'text-xs font-medium',
                 getStatusClasses(monitor.status).text
@@ -146,9 +137,9 @@
               :options="getChartConfig(monitor).options"
             />
           </div>
-          <div class="flex justify-between text-xs text-gray-400 mt-2">
+          <div class="mt-2 flex justify-between text-xs text-slate-400 dark:text-slate-500">
             <span>30天前</span>
-            <span class="text-gray-500">
+            <span class="text-slate-500 dark:text-slate-400">
               {{ getDowntimeStats(monitor) }}
             </span>
             <span>今日</span>
@@ -160,16 +151,12 @@
           <button 
             @click="toggleDowntimeList(monitor.id)" 
             :data-monitor-id="monitor.id.toString()"
-            class="w-full px-4 py-3 flex items-center justify-between text-left
-              bg-gray-50 dark:bg-gray-800/50
-              rounded-lg transition-colors duration-200
-              hover:bg-gray-100 dark:hover:bg-gray-700/50
-              focus:outline-none"
+            class="flex w-full items-center justify-between rounded-lg border border-sky-100/70 bg-sky-50/60 px-4 py-3 text-left transition-colors duration-200 hover:bg-sky-100/70 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 dark:border-sky-300/15 dark:bg-slate-900/40 dark:hover:bg-sky-950/40"
           >
-            <span class="text-xs text-gray-500 dark:text-gray-400">故障记录</span>
+            <span class="text-xs font-medium text-slate-500 dark:text-sky-100/70">故障记录</span>
             <Icon 
               icon="bi:chevron-up"
-              class="w-4 h-4 text-gray-400 transition-transform duration-200"
+              class="h-4 w-4 text-sky-500/70 transition-transform duration-200 dark:text-sky-200/70"
               :class="{ 'rotate-180': showDowntimeList === monitor.id }"
             />
           </button>
@@ -184,8 +171,7 @@
           >
             <div v-if="showDowntimeList === monitor.id" 
                  class="absolute bottom-full left-0 right-0 mb-2
-                   bg-white dark:bg-gray-800 border-[1.5px] border-gray-200 dark:border-gray-700 
-                   rounded-lg downtime-list"
+                   ice-panel rounded-lg downtime-list"
             >
               <div class="p-4 max-h-[280px] overflow-y-auto">
                 <TransitionGroup 
@@ -202,20 +188,19 @@
                   <div v-if="getDowntimeLogs(monitor)?.length" 
                        v-for="log in getDowntimeLogs(monitor)" 
                        :key="log.id"
-                       class="p-3 bg-red-50/90 dark:bg-red-900/20 rounded-lg
-                         border border-red-200/80 dark:border-red-800/80"
+                       class="rounded-lg border border-rose-200/80 bg-rose-50/90 p-3 dark:border-rose-700/50 dark:bg-rose-950/30"
                   >
                     <div class="flex justify-between">
-                      <span class="text-red-600/90 dark:text-red-400/90 text-xs">{{ getErrorMessage(log.reason) }}</span>
-                      <span class="text-red-600/80 dark:text-red-400/80 text-xs">{{ formatters.dateTime(log.datetime) }}</span>
+                      <span class="text-xs text-rose-600/90 dark:text-rose-300/90">{{ getErrorMessage(log.reason) }}</span>
+                      <span class="text-xs text-rose-600/80 dark:text-rose-300/80">{{ formatters.dateTime(log.datetime) }}</span>
                     </div>
-                    <div class="mt-1 text-red-600/80 dark:text-red-400/80 text-xs">
+                    <div class="mt-1 text-xs text-rose-600/80 dark:text-rose-300/80">
                       持续时间: {{ formatters.duration(log.duration) }}
                     </div>
                   </div>
                   <div v-else 
                        key="empty"
-                       class="text-center text-3xs text-gray-400"
+                       class="text-center text-xs text-slate-400"
                   >
                     近期无故障记录
                   </div>
@@ -244,7 +229,7 @@
         leave-active-class="transition-opacity duration-300"
       >
         <div v-show="showResponseTimeModal"
-             class="absolute inset-0 bg-black/60" 
+             class="absolute inset-0 bg-slate-950/55 backdrop-blur-sm" 
              @click="closeModal"
         ></div>
       </Transition>
@@ -261,20 +246,18 @@
         @after-leave="onAfterLeave"
       >
         <div v-show="showResponseTimeModal"
-             class="relative bg-white dark:bg-gray-800 rounded-2xl p-6 w-full max-w-3xl
-                    shadow-xl border border-gray-200 dark:border-gray-700
-                    max-h-[90vh] overflow-y-auto"
+             class="ice-panel relative max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-lg p-6"
              @click.stop
         >
           <div class="flex justify-between items-center mb-6">
-            <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100">
+            <h3 class="text-lg font-bold text-slate-900 dark:text-sky-50">
               响应时间趋势
             </h3>
             <button @click="closeModal"
-                    class="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full 
-                           transition-colors duration-200">
+                    aria-label="关闭响应时间趋势"
+                    class="icon-button hover:bg-sky-100/80 dark:hover:bg-sky-950/60">
               <Icon icon="carbon:close" 
-                    class="w-5 h-5 text-gray-500 dark:text-gray-400" />
+                    class="h-5 w-5 text-slate-500 dark:text-sky-100/70" />
             </button>
           </div>
           
@@ -284,9 +267,9 @@
                  class="h-full flex flex-col items-center justify-center gap-4">
               <Icon 
                 icon="carbon:chart-line" 
-                class="w-12 h-12 text-gray-400 dark:text-gray-500"
+                class="h-12 w-12 text-sky-300 dark:text-sky-200/60"
               />
-              <div class="text-gray-500 dark:text-gray-400 text-sm">
+              <div class="text-sm text-slate-500 dark:text-slate-400">
                 暂无数据
               </div>
             </div>
@@ -372,20 +355,20 @@ const STATUS = {
  */
 const STATUS_CONFIG = {
   2: { 
-    text: '在线', color: 'green',
-    classes: 'bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400'
+    text: '在线', color: 'teal',
+    classes: 'border-teal-200/80 bg-teal-50/90 text-teal-700 dark:border-teal-300/25 dark:bg-teal-950/40 dark:text-teal-200'
   },
   0: {
-    text: '暂停', color: 'yellow', 
-    classes: 'bg-yellow-50 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400'
+    text: '暂停', color: 'amber',
+    classes: 'border-amber-200/80 bg-amber-50/90 text-amber-700 dark:border-amber-300/25 dark:bg-amber-950/40 dark:text-amber-200'
   },
   1: {
-    text: '准备中', color: 'yellow',
-    classes: 'bg-yellow-50 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400'
+    text: '准备中', color: 'amber',
+    classes: 'border-amber-200/80 bg-amber-50/90 text-amber-700 dark:border-amber-300/25 dark:bg-amber-950/40 dark:text-amber-200'
   },
   9: {
-    text: '离线', color: 'red',
-    classes: 'bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400'
+    text: '离线', color: 'rose',
+    classes: 'border-rose-200/80 bg-rose-50/90 text-rose-700 dark:border-rose-300/25 dark:bg-rose-950/40 dark:text-rose-200'
   }
 }
 
@@ -419,36 +402,43 @@ const formatters = {
   dateTime: ts => format(new Date(ts * 1000), 'MM-dd HH:mm')
 }
 
+const getStatusCardAccent = (status) => ({
+  'after:border-teal-400/60 dark:after:border-teal-300/50': status === STATUS.ONLINE,
+  'after:border-amber-400/60 dark:after:border-amber-300/50': status === STATUS.PAUSED || status === STATUS.PREPARING,
+  'after:border-rose-400/60 dark:after:border-rose-300/50': status === STATUS.OFFLINE,
+  'after:border-sky-400/60 dark:after:border-sky-300/50': ![STATUS.ONLINE, STATUS.PAUSED, STATUS.PREPARING, STATUS.OFFLINE].includes(status)
+})
+
 /**
  * 获取状态对应的样式类
  */
 const getStatusClasses = computed(() => (status) => {
   return {
     dot: {
-      'bg-green-500 dark:bg-green-400': status === STATUS.ONLINE,
-      'bg-yellow-500 dark:bg-yellow-400': status === STATUS.PAUSED || status === STATUS.PREPARING,
-      'bg-red-500 dark:bg-red-400': status === STATUS.OFFLINE
+      'bg-teal-500 dark:bg-teal-300': status === STATUS.ONLINE,
+      'bg-amber-500 dark:bg-amber-300': status === STATUS.PAUSED || status === STATUS.PREPARING,
+      'bg-rose-500 dark:bg-rose-300': status === STATUS.OFFLINE
     },
     dotPing: {
-      'bg-green-500 dark:bg-green-400': status === STATUS.ONLINE,
-      'bg-yellow-500 dark:bg-yellow-400': status === STATUS.PAUSED || status === STATUS.PREPARING,
-      'bg-red-500 dark:bg-red-400': status === STATUS.OFFLINE
+      'bg-teal-500 dark:bg-teal-300': status === STATUS.ONLINE,
+      'bg-amber-500 dark:bg-amber-300': status === STATUS.PAUSED || status === STATUS.PREPARING,
+      'bg-rose-500 dark:bg-rose-300': status === STATUS.OFFLINE
     },
     text: {
-      'text-green-500': status === STATUS.ONLINE,
-      'text-yellow-500': status === STATUS.PAUSED || status === STATUS.PREPARING,
-      'text-red-500': status === STATUS.OFFLINE
+      'text-teal-500 dark:text-teal-300': status === STATUS.ONLINE,
+      'text-amber-500 dark:text-amber-300': status === STATUS.PAUSED || status === STATUS.PREPARING,
+      'text-rose-500 dark:text-rose-300': status === STATUS.OFFLINE
     },
     hover: {
       text: {
-        'hover:text-green-600 dark:hover:text-green-300': status === STATUS.ONLINE,
-        'hover:text-yellow-600 dark:hover:text-yellow-300': status === STATUS.PAUSED || status === STATUS.PREPARING,
-        'hover:text-red-600 dark:hover:text-red-300': status === STATUS.OFFLINE
+        'hover:text-teal-600 dark:hover:text-teal-200': status === STATUS.ONLINE,
+        'hover:text-amber-600 dark:hover:text-amber-200': status === STATUS.PAUSED || status === STATUS.PREPARING,
+        'hover:text-rose-600 dark:hover:text-rose-200': status === STATUS.OFFLINE
       },
       bg: {
-        'hover:bg-green-50 dark:hover:bg-green-900/30': status === STATUS.ONLINE,
-        'hover:bg-yellow-50 dark:hover:bg-yellow-900/30': status === STATUS.PAUSED || status === STATUS.PREPARING,
-        'hover:bg-red-50 dark:hover:bg-red-900/30': status === STATUS.OFFLINE
+        'hover:bg-teal-50 dark:hover:bg-teal-950/40': status === STATUS.ONLINE,
+        'hover:bg-amber-50 dark:hover:bg-amber-950/40': status === STATUS.PAUSED || status === STATUS.PREPARING,
+        'hover:bg-rose-50 dark:hover:bg-rose-950/40': status === STATUS.OFFLINE
       }
     }
   }

@@ -1,28 +1,29 @@
 <template>
-  <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+  <div class="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
     <div 
       v-for="(item, index) in overviewItems" 
       :key="index"
-      class="card-base animated-border animate-fade"
+      class="card-base animated-border animate-fade overflow-hidden"
       :class="[item.containerClass]"
-      @mouseenter="$event.target.classList.add('hovered')"
+      @mouseenter="$event.currentTarget.classList.add('hovered')"
     >
-      <div class="flex items-start justify-between relative">
-        <div>
-          <div class="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400">
+      <div class="absolute inset-x-4 top-0 h-px bg-gradient-to-r from-transparent via-sky-300/80 to-transparent dark:via-sky-200/30" />
+      <div class="relative flex items-start justify-between gap-3">
+        <div class="min-w-0">
+          <div class="text-xs font-semibold text-slate-500 dark:text-sky-100/70 sm:text-sm">
             {{ item.label }}
           </div>
-          <div class="mt-2 text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">
-            <span>{{ displayValues[index] }}</span><span v-if="item.unit">{{ item.unit }}</span>
+          <div class="mt-2 flex items-baseline gap-1 text-xl font-bold text-slate-950 dark:text-sky-50 sm:text-2xl">
+            <span class="tabular-nums">{{ displayValues[index] }}</span><span v-if="item.unit" class="text-sm text-slate-500 dark:text-sky-100/65">{{ item.unit }}</span>
           </div>
-          <div class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+          <div class="mt-1.5 text-xs text-slate-500 dark:text-slate-400">
             {{ item.desc }}
           </div>
         </div>
-        <div class="p-2.5 bg-gray-50 dark:bg-gray-800 rounded-lg">
+        <div class="shrink-0 rounded-lg border p-2.5 shadow-sm" :class="item.iconFrame">
           <Icon 
             :icon="item.icon" 
-            class="w-6 h-6 transition-colors duration-200" 
+            class="h-6 w-6 transition-colors duration-200" 
             :class="item.iconColor" 
           />
         </div>
@@ -98,16 +99,18 @@ const overviewItems = computed(() => [
     label: '监控网站',
     value: total.value,
     desc: '全部网站',
-    icon: 'bi:check-circle',
-    iconColor: 'text-emerald-500',
-    containerClass: 'after:border-emerald-500/50 dark:after:border-emerald-400/50'
+    icon: 'carbon:dashboard',
+    iconColor: 'text-sky-500 dark:text-sky-300',
+    iconFrame: 'border-sky-200/70 bg-sky-50/80 dark:border-sky-300/20 dark:bg-sky-950/40',
+    containerClass: 'after:border-sky-500/50 dark:after:border-sky-300/50'
   },
   {
     label: '正常网站',
     value: normal.value,
     desc: '访问正常',
     icon: 'bi:check-circle-fill',
-    iconColor: 'text-green-500',
+    iconColor: 'text-teal-500 dark:text-teal-300',
+    iconFrame: 'border-teal-200/70 bg-teal-50/80 dark:border-teal-300/20 dark:bg-teal-950/40',
     containerClass: 'after:border-green-500/50 dark:after:border-green-400/50'
   },
   {
@@ -115,8 +118,9 @@ const overviewItems = computed(() => [
     value: abnormal.value,
     desc: '访问异常',
     icon: 'bi:x-circle-fill',
-    iconColor: 'text-red-500',
-    containerClass: 'after:border-red-500/50 dark:after:border-red-400/50'
+    iconColor: 'text-rose-500 dark:text-rose-300',
+    iconFrame: 'border-rose-200/70 bg-rose-50/80 dark:border-rose-300/20 dark:bg-rose-950/40',
+    containerClass: 'after:border-rose-500/50 dark:after:border-rose-400/50'
   },
   {
     label: '平均响应',
@@ -124,8 +128,9 @@ const overviewItems = computed(() => [
     unit: 'ms',
     desc: '网络延迟',
     icon: 'bi:clock',
-    iconColor: 'text-blue-500',
-    containerClass: 'after:border-blue-500/50 dark:after:border-blue-400/50'
+    iconColor: 'text-indigo-500 dark:text-indigo-300',
+    iconFrame: 'border-indigo-200/70 bg-indigo-50/80 dark:border-indigo-300/20 dark:bg-indigo-950/40',
+    containerClass: 'after:border-indigo-500/50 dark:after:border-indigo-400/50'
   }
 ])
 
