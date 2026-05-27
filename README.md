@@ -64,14 +64,19 @@
 
 ### API 代理说明
 
-本项目支持以下三种部署方式,均可实现自动处理跨域请求:
+本项目支持以下部署方式,均可实现自动处理跨域请求:
 
-1. **腾讯云 EdgeOne Pages**
+1. **腾讯云 EdgeOne Pages**（新版 / 旧版均兼容）
 
    - 点击上方蓝色 "Deploy" 按钮
    - 连接到 GitHub，选择项目
    - 框架预设选择 Vue，点击开始部署
    - 使用默认配置 `VITE_UPTIMEROBOT_API_URL = "/api/status"`
+   - 函数目录约定：
+     - 新版 EdgeOne Pages（边缘函数运行时）：`edge-functions/api/status.js`
+     - 新版 EdgeOne Pages（Node.js 函数运行时）：`cloud-functions/api/status.js`
+     - 旧版 EdgeOne Pages：`functions/api/status.js`
+   - 平台会自动识别上述目录，无需额外配置；新版 EdgeOne Pages 边缘函数与 Node.js 函数二选一即可
 
 2. **Vercel**
 
@@ -79,6 +84,7 @@
    - 连接到 GitHub，选择项目
    - 填写项目名称，点击 Create
    - 使用默认配置 `VITE_UPTIMEROBOT_API_URL = "/api/status"`
+   - 函数目录：`api/status.js`
 
 3. **Cloudflare Pages**
 
@@ -87,6 +93,7 @@
    - 点击创建，选择 Pages，连接到 GitHub，选择项目，点击开始创建
    - 框架预设选择 Vue，点击保持并部署
    - 使用默认配置 `VITE_UPTIMEROBOT_API_URL = "/api/status"`
+   - 函数目录：`functions/api/status.js`
 
 4. **其他平台**
    - 自行搭建 API 代理
