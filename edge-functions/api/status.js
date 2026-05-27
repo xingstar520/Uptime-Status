@@ -114,9 +114,18 @@ export async function onRequest(context) {
     let cacheKey
 
     try {
-        data = buildUpstreamPayload(await context.request.json(), context.env)
+        const reqJson = await context.request.json()
+        data = buildUpstreamPayload(reqJson, context.env)
         if (!data.api_key) {
-            return jsonResponse({ error: 'Missing UptimeRobot API key' }, 500, 'BYPASS')
+            console.error('[status] Missing UptimeRobot API key', {
+                hasEnv: !!context.env,
+                envKeys: context.env ? Object.keys(context.env) : [],
+                bodyHasApiKey: !!reqJson?.api_key
+            })
+            return jsonResponse({
+                error: 'Missing UptimeRobot API key',
+                hint: '请在 EdgeOne Pages 控制台 → 项目 → 设置 → 环境变量 中添加 UPTIMEROBOT_API_KEY 并重新部署'
+            }, 500, 'BYPASS')
         }
 
         cacheKey = getCacheKey(data)
@@ -126,7 +135,8 @@ export async function onRequest(context) {
             return jsonResponse(freshCache.data, 200, 'HIT')
         }
     } catch (error) {
-        return jsonResponse({ error: '请求参数无效' }, 400, 'BYPASS')
+        console.error('[status] parse request failed:', error?.message || error)
+        return jsonResponse({ error: '请求参数无效', message: error?.message }, 400, 'BYPASS')
     }
 
     const controller = new AbortController()
@@ -153,12 +163,17 @@ export async function onRequest(context) {
         return jsonResponse(result, invalidJson ? 502 : response.status, 'MISS')
 
     } catch (error) {
+        console.error('[status] upstream fetch failed:', error?.name, error?.message)
         const staleCache = getCachedResponse(cacheKey)
         if (staleCache?.status === 'STALE') {
             return jsonResponse(staleCache.data, 200, 'STALE')
         }
 
-        return jsonResponse({ error: '请求失败' }, 500, 'BYPASS')
+        return jsonResponse({
+            error: '请求失败',
+            type: error?.name || 'UpstreamError',
+            message: error?.message
+        }, 500, 'BYPASS')
     } finally {
         clearTimeout(timeoutId)
     }
