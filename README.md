@@ -70,7 +70,7 @@
    - 构建命令：`npm run build`
    - 输出目录：`dist`
    - 安装命令：`npm install`
-4. 边缘函数目录：`edge-functions/api/status.js` → 自动映射到 `/api/status`（平台自动识别无需额外配置）
+4. 函数目录：`cloud-functions/api/status.js` → 自动映射到 `/api/status`（Cloud Functions / Node.js 运行时，日志可在控制台 “函数 → Cloud Functions” 中查看）
 
 #### 环境变量配置
 

@@ -4,19 +4,19 @@ import path from 'path'
 
 /**
  * 本地开发用的 /api/status 中间件
- * 复用 edge-functions/api/status.js 的 onRequest 实现，让本地 dev 行为与 EdgeOne Pages 边缘函数一致。
- * 部署到 EdgeOne 时不会走这里，平台会接管 edge-functions/ 目录的函数路由。
+ * 复用 cloud-functions/api/status.js 的 onRequest 实现，让本地 dev 行为与 EdgeOne Pages Cloud Functions 一致。
+ * 部署到 EdgeOne 时不会走这里，平台会接管 cloud-functions/ 目录的函数路由。
  */
 const devApiPlugin = (env) => ({
   name: 'dev-api-status',
   configureServer(server) {
     server.middlewares.use('/api/status', async (req, res) => {
       try {
-        const mod = await server.ssrLoadModule('/edge-functions/api/status.js')
+        const mod = await server.ssrLoadModule('/cloud-functions/api/status.js')
         const onRequest = mod.onRequest || mod.default
         if (typeof onRequest !== 'function') {
           res.statusCode = 500
-          res.end('onRequest handler not found in edge-functions/api/status.js')
+          res.end('onRequest handler not found in cloud-functions/api/status.js')
           return
         }
 

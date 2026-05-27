@@ -1,12 +1,12 @@
 /**
- * API 代理实现（新版腾讯云 EdgeOne Pages - Edge Functions 运行时）
+ * API 代理实现（腾讯云 EdgeOne Pages - Cloud Functions / Node.js 运行时）
  *
- * 该文件运行在 EdgeOne 全球边缘节点上，基于 Web 标准 Fetch API 实现：
- * - 路由：/edge-functions/api/status.js -> /api/status
+ * 路由：/cloud-functions/api/status.js -> /api/status
  * - 用于代理 UptimeRobot API 请求，避免跨域问题
  * - 处理 OPTIONS / POST 请求，包含本地缓存与 stale-while-revalidate 逻辑
+ * - 日志输出可在 EdgeOne Pages 控制台 → 函数 → Cloud Functions 日志中查看
  *
- * 环境变量配置（在 EdgeOne Pages 控制台或 .env 中设置）：
+ * 环境变量配置（在 EdgeOne Pages 控制台环境变量中设置）：
  * - UPTIMEROBOT_API_KEY 或 VITE_UPTIMEROBOT_API_KEY：UptimeRobot 只读 API Key
  *
  * 前端 .env 配置：
@@ -37,7 +37,16 @@ const jsonResponse = (data, status = 200, cacheStatus = 'MISS') => {
     return new Response(JSON.stringify(data), { status, headers })
 }
 
-const getServerApiKey = (env = {}) => env.UPTIMEROBOT_API_KEY || env.VITE_UPTIMEROBOT_API_KEY || ''
+const getServerApiKey = (env = {}) => {
+    if (env.UPTIMEROBOT_API_KEY || env.VITE_UPTIMEROBOT_API_KEY) {
+        return env.UPTIMEROBOT_API_KEY || env.VITE_UPTIMEROBOT_API_KEY
+    }
+    // Node.js 运行时下兜底从 process.env 读取
+    if (typeof process !== 'undefined' && process.env) {
+        return process.env.UPTIMEROBOT_API_KEY || process.env.VITE_UPTIMEROBOT_API_KEY || ''
+    }
+    return ''
+}
 
 const buildUpstreamPayload = (body, env = {}) => {
     const apiKey = getServerApiKey(env)
@@ -101,15 +110,11 @@ const saveCache = (cacheKey, data) => {
     })
 }
 
-export async function onRequest(context) {
-    if (context.request.method === 'OPTIONS') {
-        return new Response(null, { headers: corsHeaders })
-    }
+export async function onRequestOptions() {
+    return new Response(null, { headers: corsHeaders })
+}
 
-    if (context.request.method !== 'POST') {
-        return jsonResponse({ error: '只支持 POST 请求' }, 405, 'BYPASS')
-    }
-
+export async function onRequestPost(context) {
     let data
     let cacheKey
 
@@ -143,6 +148,7 @@ export async function onRequest(context) {
     const timeoutId = setTimeout(() => controller.abort(), UPSTREAM_TIMEOUT_MS)
 
     try {
+        console.log('[status] fetching upstream UptimeRobot API...')
         const response = await fetch(UPTIMEROBOT_API_URL, {
             method: 'POST',
             headers: {
@@ -160,6 +166,7 @@ export async function onRequest(context) {
             saveCache(cacheKey, result)
         }
 
+        console.log('[status] upstream responded:', response.status, result?.stat)
         return jsonResponse(result, invalidJson ? 502 : response.status, 'MISS')
 
     } catch (error) {
@@ -177,4 +184,12 @@ export async function onRequest(context) {
     } finally {
         clearTimeout(timeoutId)
     }
+}
+
+// 兜底：处理其它非 POST/OPTIONS 方法
+export async function onRequest(context) {
+    const method = context.request.method
+    if (method === 'OPTIONS') return onRequestOptions()
+    if (method === 'POST') return onRequestPost(context)
+    return jsonResponse({ error: '只支持 POST 请求' }, 405, 'BYPASS')
 }
