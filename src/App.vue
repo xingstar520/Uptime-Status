@@ -55,7 +55,7 @@ const refreshData = async () => {
   if (isRefreshing.value) return
   
   isRefreshing.value = true
-  monitors.value = []
+  const hasCachedData = monitors.value.length > 0
   errorMessage.value = ''
   
   const timeoutPromise = new Promise((_, reject) => 
@@ -69,9 +69,11 @@ const refreshData = async () => {
     ])
   } catch (error) {
     console.error('获取监控数据失败:', error)
-    errorMessage.value = error.message === 'Timeout' 
-      ? '请求超时，请检查网络连接后重试'
-      : '获取监控数据失败，请稍后重试'
+    if (!hasCachedData) {
+      errorMessage.value = error.message === 'Timeout' 
+        ? '请求超时，请检查网络连接后重试'
+        : '获取监控数据失败，请稍后重试'
+    }
   } finally {
     isRefreshing.value = false
   }
