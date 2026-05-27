@@ -16,6 +16,7 @@
 const CACHE_TTL_MS = 60 * 1000
 const STALE_TTL_MS = 5 * 60 * 1000
 const UPSTREAM_TIMEOUT_MS = 25000
+const UPTIMEROBOT_API_URL = 'https://api.uptimerobot.com/v2/getMonitors'
 const cache = new Map()
 
 const corsHeaders = {
@@ -34,6 +35,44 @@ const jsonResponse = (data, status = 200, cacheStatus = 'MISS') => {
   }
 
   return new Response(JSON.stringify(data), { status, headers })
+}
+
+const getServerApiKey = (env = {}) => env.UPTIMEROBOT_API_KEY || env.VITE_UPTIMEROBOT_API_KEY || ''
+
+const buildUpstreamPayload = (body, env = {}) => {
+  const apiKey = getServerApiKey(env)
+  return apiKey ? { ...body, api_key: apiKey } : body
+}
+
+const toFormBody = (payload) => {
+  const form = new URLSearchParams()
+
+  Object.entries(payload).forEach(([key, value]) => {
+    if (value === undefined || value === null || value === '') return
+    form.set(key, String(value))
+  })
+
+  return form
+}
+
+const parseUpstreamJson = async (response) => {
+  const text = await response.text()
+
+  try {
+    return { data: text ? JSON.parse(text) : {} }
+  } catch (error) {
+    return {
+      data: {
+        stat: 'fail',
+        error: {
+          type: 'upstream_invalid_json',
+          message: 'UptimeRobot returned a non-JSON response',
+          status: response.status
+        }
+      },
+      invalidJson: true
+    }
+  }
 }
 
 const getCacheKey = (body) => JSON.stringify(body)
@@ -75,7 +114,11 @@ export async function onRequest(context) {
   let cacheKey
 
   try {
-    data = await context.request.json()
+    data = buildUpstreamPayload(await context.request.json(), context.env)
+    if (!data.api_key) {
+      return jsonResponse({ error: 'Missing UptimeRobot API key' }, 500, 'BYPASS')
+    }
+
     cacheKey = getCacheKey(data)
 
     const freshCache = getCachedResponse(cacheKey)
@@ -90,20 +133,24 @@ export async function onRequest(context) {
   const timeoutId = setTimeout(() => controller.abort(), UPSTREAM_TIMEOUT_MS)
 
   try {
-    const response = await fetch('https://api.uptimerobot.com/v2/getMonitors', {
+    const response = await fetch(UPTIMEROBOT_API_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
+      headers: {
+        'Accept': 'application/json',
+        'Cache-Control': 'no-cache',
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: toFormBody(data),
       signal: controller.signal
     })
 
-    const result = await response.json()
+    const { data: result, invalidJson } = await parseUpstreamJson(response)
 
     if (response.ok && result?.stat === 'ok') {
       saveCache(cacheKey, result)
     }
 
-    return jsonResponse(result, response.status, 'MISS')
+    return jsonResponse(result, invalidJson ? 502 : response.status, 'MISS')
 
   } catch (error) {
     const staleCache = getCachedResponse(cacheKey)
