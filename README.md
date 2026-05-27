@@ -13,14 +13,8 @@
 </p>
 
 <p align="center">
-  <a href="https://vercel.com/new/clone?repository-url=https://github.com/JLinmr/uptime-status" title="使用 Vercel 部署">
-    <img src="https://vercel.com/button" alt="Deploy with Vercel" />
-  </a>
   <a href="https://console.cloud.tencent.com/edgeone/pages?action=create" title="使用腾讯云 EdgeOne Pages 部署">
     <img src="https://img.shields.io/badge/-Deploy-00A4FF?style=for-the-badge&labelColor=00A4FF&color=00A4FF&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMjgiIGhlaWdodD0iMTI4IiB2aWV3Qm94PSIwIDAgMjQgMjQiPjxwYXRoIGZpbGw9IndoaXRlIiBkPSJNNi41IDIwcS0yLjI3NSAwLTMuODg3LTEuNTc1VDEgMTQuNTc1cTAtMS45NSAxLjE3NS0zLjQ3NVQ1LjI1IDkuMTVxLjYyNS0yLjMgMi41LTMuNzI1VDEyIDRxMi45MjUgMCA0Ljk2MyAyLjAzOFQxOSAxMXExLjcyNS4yIDIuODYzIDEuNDg4VDIzIDE1LjVxMCAxLjg3NS0xLjMxMiAzLjE4OFQxOC41IDIweiIvPjwvc3ZnPg==&borderRadius=6" alt="部署到腾讯云 EdgeOne" height="32" />
-  </a>
-  <a href="https://dash.cloudflare.com/" title="使用 Cloudflare Pages 部署">
-    <img src="https://img.shields.io/badge/-Deploy-F38020?style=for-the-badge&labelColor=F38020&color=F38020&logo=cloudflare&logoColor=white&borderRadius=6" alt="部署到 Cloudflare Pages" height="32" />
   </a>
 </p>
 
@@ -64,40 +58,32 @@
 
 ### API 代理说明
 
-本项目支持以下部署方式,均可实现自动处理跨域请求:
+本项目专为 **腾讯云 EdgeOne Pages** 部署设计，使用边缘函数自动处理跨域请求：
 
-1. **腾讯云 EdgeOne Pages**（新版 / 旧版均兼容）
+#### 部署步骤
 
-   - 点击上方蓝色 "Deploy" 按钮
-   - 连接到 GitHub，选择项目
-   - 框架预设选择 Vue，点击开始部署
-   - 使用默认配置 `VITE_UPTIMEROBOT_API_URL = "/api/status"`
-   - 函数目录约定：
-     - 新版 EdgeOne Pages（边缘函数运行时）：`edge-functions/api/status.js`
-     - 新版 EdgeOne Pages（Node.js 函数运行时）：`cloud-functions/api/status.js`
-     - 旧版 EdgeOne Pages：`functions/api/status.js`
-   - 平台会自动识别上述目录，无需额外配置；新版 EdgeOne Pages 边缘函数与 Node.js 函数二选一即可
+1. 点击上方蓝色 "Deploy" 按钮进入腾讯云 EdgeOne Pages 控制台
+2. 连接到 GitHub，选择项目
+3. 构建配置：
+   - 框架预设：`Vite`
+   - 根目录：`/`
+   - 构建命令：`npm run build`
+   - 输出目录：`dist`
+   - 安装命令：`npm install`
+4. 边缘函数目录：`edge-functions/api/status.js` → 自动映射到 `/api/status`（平台自动识别无需额外配置）
 
-2. **Vercel**
+#### 环境变量配置
 
-   - 点击上方黑色 "Deploy" 按钮
-   - 连接到 GitHub，选择项目
-   - 填写项目名称，点击 Create
-   - 使用默认配置 `VITE_UPTIMEROBOT_API_URL = "/api/status"`
-   - 函数目录：`api/status.js`
+在 EdgeOne Pages 控制台 → 项目 → **设置 → 环境变量** 中添加：
 
-3. **Cloudflare Pages**
+| 变量名                     | 作用                          |
+| -------------------------- | ----------------------------- |
+| `UPTIMEROBOT_API_KEY`      | **函数运行时**读取的 API Key |
+| `VITE_UPTIMEROBOT_API_KEY` | **前端构建期**注入的 API Key |
+| `VITE_UPTIMEROBOT_API_URL` | 前端代理地址，设为 `/api/status` |
+| `VITE_APP_TITLE`           | 站点名称                      |
 
-   - 点击上方橙色 "Deploy" 按钮
-   - 找到计算(worker) 部分
-   - 点击创建，选择 Pages，连接到 GitHub，选择项目，点击开始创建
-   - 框架预设选择 Vue，点击保持并部署
-   - 使用默认配置 `VITE_UPTIMEROBOT_API_URL = "/api/status"`
-   - 函数目录：`functions/api/status.js`
-
-4. **其他平台**
-   - 自行搭建 API 代理
-   - 在 `.env` 文件中设置 `VITE_UPTIMEROBOT_API_URL` 为你的 API 代理地址
+> 修改环境变量后需要 **重新部署** 才能生效。
 
 ### 快速开始
 
@@ -125,9 +111,7 @@ npm install
 VITE_UPTIMEROBOT_API_KEY = "ur2290572-af4663a4e3f83be26119abbe"
 
 # UptimeRobot API URL
-# 除腾讯云 EdgeOne Pages 、vercel 、cloudflare pages 外
-## 其它部署方式需要自行搭建 API 代理
-## 代理地址 https://api.uptimerobot.com/v2/getMonitors
+# 部署到 EdgeOne Pages 使用默认值 `/api/status`，由 edge-functions/api/status.js 接管代理
 VITE_UPTIMEROBOT_API_URL = "/api/status"
 
 # 站点名称
